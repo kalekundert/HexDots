@@ -1,12 +1,29 @@
 import graph
 import pathfinding
 
+# Future Changes {{{1
+# ==============
+# 1. I think I should move most of the code in the geometry class into the
+#    map class, because the game-play does depend on the geometry of the map.
+#    For example, the heuristic function for an A* search depends on
+#    information regarding the geometry of the map. 
+#
+#    I created the geometry class in the first place because I thought that
+#    only the graphical interface would need to know about the shape of the
+#    tiles.  
+#
+#    You know, this may not be true.  For one thing, the size of the tiles
+#    certainly doesn't affect game-play.  In the search algorithm, it would
+#    just be a scale factor.  I may be able to determine the heuristic from
+#    just the row, column, and offset parameters.
+# }}}1
+
 # World {{{1
 class World:
 
     def __init__(self):
         self.map = Map()
-        self.dot = Dot()
+        self.dot = Dot(self.map)
 
     def load(self, path):
         self.map.load(path)
@@ -23,9 +40,9 @@ class World:
 # Dot {{{1
 class Dot:
 
-    def __init__(self):
+    def __init__(self, map):
         self.position = None
-        #self.pathfinder = Pathfinder()
+        self.pathfinder = pathfinding.A_Star(map)
 
     def load(self, position):
         self.position = position
@@ -35,13 +52,19 @@ class Dot:
 
     def get_position(self):
         return self.position
+
+    def get_pathfinder(self):
+        return self.pathfinder
+
+    def get_waypoints(self):
+        return self.pathfinder.get_route()
 # }}}1
 
 # Tile {{{1
 class Tile(graph.Node):
 
     def __init__(self, row, column, offset):
-        graph.Node.__init__(self, 0)
+        graph.Node.__init__(self, 1)
 
         self.row = row
         self.column = column
@@ -70,6 +93,7 @@ class ImpassableTile(Tile):
 # Map {{{1
 class Map(graph.SparseGraph):
 
+    # Constructor {{{2
     def __init__(self):
         graph.SparseGraph.__init__(self)
 
@@ -107,6 +131,10 @@ class Map(graph.SparseGraph):
         return self.rows
     def get_dimensions(self):
         return (self.columns, self.rows)
+    # }}}2
+
+    def heuristic(self, end, target):
+        return 0
 
     # Load From File {{{2
 

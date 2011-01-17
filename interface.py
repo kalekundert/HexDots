@@ -8,13 +8,13 @@ from vector import *
 
 # Known Bugs {{{1
 # ==========
-# 1. The point_to_tile() method in the geometry class isn't super-accurate.
-#    For one thing, the algorithm itself makes a lot of approximations.  But
-#    even considering those approximations, the result is sometimes off.
+# None!
 #
-#    For example, the algorithm I'm using should never make a mistake in the
-#    horizontal direction.  However, it seems to get confused within 5-10
-#    pixels of a column boundary on the highest and lowest rows.
+# Areas to Improve {{{1
+# ================
+# 1. The point_to_tile() method in the geometry class isn't super-accurate.
+# This is a consequence of the algorithm that's being used, which assumes a
+# rectangular map, not a hexagonal one.
 # }}}1
 
 # Interface Loop {{{1
@@ -155,12 +155,12 @@ class Geometry:
         return Vector(x, y)
 
     def point_to_tile(self, x, y):
-        row = int(y / int(self.grid_height))
+        row = int(y / self.grid_height)
 
         if self.offsets[row]:
             x -= self.grid_width * 0.5
 
-        column = int(x / int(self.grid_width))
+        column = int(x / self.grid_width)
 
         return self.map.get_tile(row, column)
 
@@ -215,6 +215,9 @@ class Style:
         self.target_color = Color(0, 255, 0)
         self.target_radius = int(tile_width / 5)
 
+        self.waypoint_color = Color(255, 0, 255)
+        self.waypoint_radius = int(tile_width / 5)
+
     def for_tile(self, tile):
         column = tile.get_column()
         offset = tile.get_offset()
@@ -228,14 +231,14 @@ class Style:
         return self.background_color
 
     def for_dot(self):
-        return (self.dot_fill,
-                self.dot_radius,
-                self.dot_outline,
-                self.dot_stroke)
+        return (self.dot_fill, self.dot_radius,
+                self.dot_outline, self.dot_stroke)
         
     def for_target(self):
-        return (self.target_color,
-                self.target_radius)
+        return self.target_color, self.target_radius
+
+    def for_waypoint(self):
+        return self.waypoint_color, self.waypoint_radius
 # }}}1
 
 # Map Artist {{{1
@@ -284,6 +287,12 @@ class DotArtist:
 
         pygame.draw.circle(screen, outline, center, radius)
         pygame.draw.circle(screen, fill, center, radius - stroke)
+
+        for tile in self.dot.get_waypoints():
+            center = geometry.tile_to_point(tile).get_int_tuple()
+            color, radius = style.for_waypoint()
+
+            pygame.draw.circle(screen, color, center, radius)
 
 # Target Artist {{{1
 class TargetArtist:
@@ -337,7 +346,12 @@ class TargetActor:
 
         try: 
             dot = controls.get_selection()
+            pathfinder = dot.get_pathfinder()
+
+            source = dot.get_position()
             target = geometry.point_to_tile(*event.pos)
+
+            pathfinder.search(source, target)
 
         except EmptySelection:
             return

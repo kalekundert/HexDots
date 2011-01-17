@@ -7,6 +7,7 @@ class SearchAlgorithm:
 
     # Operators {{{2
     def __init__(self):
+        self.route = []
         self.routes = {}
         self.visited = {}
 
@@ -34,7 +35,7 @@ class SearchAlgorithm:
     # }}}2
 
     # Search Methods {{{2
-    def search(self, map):
+    def search(self, source, target):
         self.searching = True
         self.start_time = time.time()
 
@@ -143,15 +144,13 @@ class BreadthFirstSearch(SearchAlgorithm):
 
 # The Mighty A* {{{1
 class A_Star(SearchAlgorithm):
-    def __init__(self, heuristic):
-        self.heuristic = heuristic
 
-    def search(self, map):
-        SearchAlgorithm.search(self, map)
+    def __init__(self, graph):
+        SearchAlgorithm.__init__(self)
+        self.graph = graph
 
-        # Define some variables in local scope.
-        source = map.get_source()
-        target = map.get_target()
+    def search(self, source, target):
+        SearchAlgorithm.search(self, source, target)
 
         routes = {}
         starting_nodes = { source : source }
@@ -162,7 +161,7 @@ class A_Star(SearchAlgorithm):
         frontier_nodes = trees.IndexedPQ(estimated_costs)
         frontier_nodes.push(source)
 
-        heuristic = self.heuristic
+        heuristic = self.graph.heuristic
 
         # Loop through the graph.
         while not frontier_nodes.empty():
@@ -176,9 +175,9 @@ class A_Star(SearchAlgorithm):
                 break
 
             # Add more edges to consider.
-            edges_from = map.expand_node(closest_node)
+            edges_from = self.graph.expand_node(closest_node)
             if not edges_from:
-                edges_from = map.get_edges_from(closest_node)
+                edges_from = self.graph.get_edges_from(closest_node)
 
             for edge in edges_from:
                 if not edge.is_active(): continue
