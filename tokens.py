@@ -1,21 +1,18 @@
 import graph
 import pathfinding
 
-# Future Changes {{{1
-# ==============
-# 1. I think I should move most of the code in the geometry class into the
-#    map class, because the game-play does depend on the geometry of the map.
-#    For example, the heuristic function for an A* search depends on
-#    information regarding the geometry of the map. 
+# Known Bugs {{{1
+# ==========
+# 1. The route returned by the pathfinder includes the tile that the dot is
+#    currently on, but the code that is responsible for moving the dot doesn't
+#    take this behavior into account.
 #
-#    I created the geometry class in the first place because I thought that
-#    only the graphical interface would need to know about the shape of the
-#    tiles.  
-#
-#    You know, this may not be true.  For one thing, the size of the tiles
-#    certainly doesn't affect game-play.  In the search algorithm, it would
-#    just be a scale factor.  I may be able to determine the heuristic from
-#    just the row, column, and offset parameters.
+# Areas to Improve {{{1
+# ================
+# 1. Create a heuristic function for the map.  I'm pretty sure that this
+#    heuristic needs no information other than the row, column, and offset
+#    parameters of the source and target tiles in question.  If this is the
+#    case, then this change shouldn't require any change in architecture.
 # }}}1
 
 # World {{{1
@@ -44,11 +41,21 @@ class Dot:
         self.position = None
         self.pathfinder = pathfinding.A_Star(map)
 
+        self.speed = 500
+        self.progress = 0
+
     def load(self, position):
         self.position = position
 
-    def update(self):
-        pass
+    def update(self, time):
+        route = self.pathfinder.get_route()
+        if not route:
+            return
+
+        self.progress += time
+        if self.progress > self.speed:
+            self.position = route.pop()
+            self.progress = 0
 
     def get_position(self):
         return self.position

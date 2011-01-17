@@ -6,8 +6,8 @@ class GameLoop:
     def setup(self):
         pass
 
-    def update(self):
-        self.world.get_dot().update()
+    def update(self, time):
+        self.world.get_dot().update(time)
 
     def teardown(self):
         pass

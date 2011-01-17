@@ -63,7 +63,7 @@ class InterfaceLoop:
         size = self.geometry.for_window()
         self.screen = pygame.display.set_mode(size)
 
-    def update(self):
+    def update(self, time):
 
         background = self.style.for_background()
         self.screen.fill(background)
@@ -72,13 +72,13 @@ class InterfaceLoop:
         for event in pygame.event.get():
             try:
                 actor = self.actors[event.type]
-                actor.handle(event)
+                actor.handle(event, time)
             except KeyError:
                 pass
 
         # Draw the next frame.
         for artist in self.artists:
-            artist.draw(self.screen)
+            artist.draw(self.screen, time)
 
         # Update the display and sleep.
         pygame.display.flip()
@@ -263,7 +263,7 @@ class MapArtist:
 
             self.tiles.append((points, fill, outline, stroke))
 
-    def draw(self, screen):
+    def draw(self, screen, time):
         for points, fill, outline, stroke in self.tiles:
             pygame.draw.polygon(screen, fill, points)
             pygame.draw.polygon(screen, outline, points, stroke)
@@ -278,7 +278,7 @@ class DotArtist:
     def load(self):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, time):
         style = self.gui.get_style()
         geometry = self.gui.get_geometry()
 
@@ -303,7 +303,7 @@ class TargetArtist:
     def load(self):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, time):
         style = self.gui.get_style()
         geometry = self.gui.get_geometry()
         controls = self.gui.get_controls()
@@ -327,7 +327,7 @@ class QuitActor:
     def load(self):
         pass
 
-    def handle(self, event):
+    def handle(self, event, time):
         raise SystemExit
 
 # Target Actor {{{1
@@ -340,7 +340,7 @@ class TargetActor:
     def load(self):
         pass
 
-    def handle(self, event):
+    def handle(self, event, time):
         controls = self.controls
         geometry = self.gui.get_geometry()
 
