@@ -69,7 +69,7 @@ class Edge:
         self.end = end
     def set_distance(self, distance):
         self.distance = distance
-# }}}1
+
 # Graph {{{1
 class SparseGraph:
     def __init__(self):
