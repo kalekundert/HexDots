@@ -1,3 +1,5 @@
+from __future__ import division
+
 import math
 import random
 
@@ -8,6 +10,9 @@ class Vector(object):
     def __init__(self, x, y):
         self.__x = x
         self.__y = y
+
+    def __iter__(self):
+        yield self.x; yield self.y
 
     def __add__(self, v):
         return Vector(self.x + v.x, self.y + v.y)
@@ -22,16 +27,16 @@ class Vector(object):
         return Vector(abs(self.x), abs(self.y))
     
     def __mul__(self, c):
-        return Vector(c*self.x, c*self.y)
+        return Vector(c * self.x, c * self.y)
 
     def __rmul__(self, c):
         return Vector(c * self.x, c * self.y)
 
-    def __div__(self, c):
-        return Vector(self.x/c, self.y/c)
+    def __truediv__(self, c):
+        return Vector(self.x / c, self.y / c)
 
-    def __rdiv__(self, c):
-        return Vector(c/self.x, c/self.y)
+    def __floordiv__(self, c):
+        return Vector(self.x // c, self.y // c)
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
@@ -55,7 +60,7 @@ class Vector(object):
     def r(self):
         return self.__x
     @property
-    def theta(self):
+    def th(self):
         return self.__y
 
     def get_x(self):
@@ -65,13 +70,13 @@ class Vector(object):
 
     def get_r(self):
         return self.__x
-    def get_theta(self):
+    def get_th(self):
         return self.__y
 
     def get_tuple(self):
-        return (self.x, self.y)
+        return self.x, self.y
     def get_int_tuple(self):
-        return (int(self.x), int(self.y))
+        return int(self.x), int(self.y)
 
     def get_magnitude(self):
         squared = self.get_magnitude_squared()
@@ -88,10 +93,19 @@ class Vector(object):
         normal = self - tangent
         return normal, tangent
 
-    @staticmethod
-    def get_random():
+    @classmethod
+    def from_random(Class):
         theta = random.uniform(0, 2 * math.pi)
-        return Vector(math.cos(theta), math.sin(theta))
+        return Class(math.cos(theta), math.sin(theta))
+
+    @classmethod
+    def from_radians(Class, theta):
+        return Class(math.cos(theta), math.sin(theta))
+
+    @classmethod
+    def from_degrees(Class, angle):
+        theta = angle * (math.pi / 180)
+        return Class.from_radians(theta)
 
     @staticmethod
     def get_angle(A, B):

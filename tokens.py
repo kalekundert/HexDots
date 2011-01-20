@@ -1,70 +1,62 @@
 import graph
-import pathfinding
-
-# Known Bugs {{{1
-# ==========
-# 1. The route returned by the pathfinder includes the tile that the dot is
-#    currently on, but the code that is responsible for moving the dot doesn't
-#    take this behavior into account.
-#
-# Areas to Improve {{{1
-# ================
-# 1. Create a heuristic function for the map.  I'm pretty sure that this
-#    heuristic needs no information other than the row, column, and offset
-#    parameters of the source and target tiles in question.  If this is the
-#    case, then this change shouldn't require any change in architecture.
-# }}}1
 
 # World {{{1
 class World:
 
     def __init__(self):
         self.map = Map()
-        self.dot = Dot(self.map)
+        self.dots = [Dot(self.map)]
 
     def load(self, path):
         self.map.load(path)
 
         home = self.map.get_home_tile()
-        self.dot.load(home)
+        self.dots[0].load(home)
 
     def get_map(self):
         return self.map
 
-    def get_dot(self):
-        return self.dot
+    def get_dots(self):
+        return self.dots
 
 # Dot {{{1
 class Dot:
 
     def __init__(self, map):
         self.position = None
-        self.pathfinder = pathfinding.A_Star(map)
 
         self.speed = 500
         self.progress = 0
+
+        self.route = []
+        self.target = None
 
     def load(self, position):
         self.position = position
 
     def update(self, time):
-        route = self.pathfinder.get_route()
-        if not route:
+        if not self.route:
             return
 
         self.progress += time
         if self.progress > self.speed:
-            self.position = route.pop()
+            self.position = self.route.pop()
             self.progress = 0
+
+        if not self.route:
+            self.target = None
 
     def get_position(self):
         return self.position
+    def get_route(self):
+        return self.route
+    def get_target(self):
+        return self.target
 
-    def get_pathfinder(self):
-        return self.pathfinder
-
-    def get_waypoints(self):
-        return self.pathfinder.get_route()
+    def set_route(self, loop, route):
+        self.route = route
+    def set_target(self, loop, target):
+        self.target = target
 # }}}1
 
 # Tile {{{1
