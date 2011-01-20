@@ -4,7 +4,7 @@ import pygame
 from pygame.locals import *
 
 import os, sys
-import tokens
+import engine, tokens
 
 from game import GameLoop
 from interface import InterfaceLoop
@@ -32,9 +32,10 @@ except IndexError:
 
 # Create some important game managers.
 world = tokens.World()
+messenger = engine.Messenger()
 
 clock = pygame.time.Clock()
-loops = GameLoop(world), InterfaceLoop(world)
+loops = GameLoop(world, messenger), InterfaceLoop(world, messenger)
 
 # Load the game world.
 world.load(map)
