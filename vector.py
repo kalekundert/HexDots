@@ -3,8 +3,6 @@ from __future__ import division
 import math
 import random
 
-from singleton import *
-
 # A kick-ass 2D vector class.
 class Vector(object):
     def __init__(self, x, y):
