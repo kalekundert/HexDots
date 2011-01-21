@@ -44,6 +44,9 @@ class Vector(object):
     def __ne__(self, other):
         return self.x != other.x or self.y != other.y
 
+    def __nonzero__(self):
+        return self.x != 0 or self.y != 0
+
     def __repr__(self):
         return "<%.2f, %.2f>" % self.get_tuple()
     def __str__(self):
@@ -132,9 +135,3 @@ class Vector(object):
 
     dot = dot_product
     perp = perp_product
-
-@singleton
-class ZeroVector(Vector):
-    def __init__(self):
-        Vector.__init__(self, 0, 0)
-
